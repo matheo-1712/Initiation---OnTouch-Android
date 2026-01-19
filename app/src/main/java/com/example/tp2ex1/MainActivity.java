@@ -34,6 +34,10 @@ public class MainActivity extends AppCompatActivity {
                         return true; // Important pour continuer à recevoir les autres événements
                     case MotionEvent.ACTION_MOVE:
                         Log.d(DEBUG_TAG, "Action was MOVE");
+                        // On déplace le carré à la position du doigt
+                        box.setX(event.getX() - (float) box.getWidth() / 2);
+                        box.setY(event.getY() - (float) box.getHeight() / 2);
+
                         return true;
                     case MotionEvent.ACTION_UP:
                         Log.d(DEBUG_TAG, "Action was UP");
