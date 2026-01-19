@@ -40,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
 
                     Log.d(DEBUG_TAG, "onDown: Touch started inside the box");
                     isDragging = true; // commence le drag
+
                     return true; // on consomme l'événement
                 }
                 isDragging = false;
@@ -56,6 +57,11 @@ public class MainActivity extends AppCompatActivity {
                 }
                 return false;
             }
+
+            public boolean onTap() {
+                Log.d(DEBUG_TAG, "onTap: Touch on the box");
+                return true; // on consomme
+                }
         });
 
         // Applique le GestureDetector sur le layout racine
