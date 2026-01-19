@@ -2,8 +2,11 @@ package com.example.tp2ex1;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
@@ -11,6 +14,9 @@ public class MainActivity extends AppCompatActivity {
     private static final String DEBUG_TAG = "DEBUG";
     private View box;
     private View rootLayout;
+
+    private GestureDetector gestureDetector;
+    private boolean isDragging = false; // pour savoir si on est en train de déplacer la boîte
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,56 +26,39 @@ public class MainActivity extends AppCompatActivity {
         box = findViewById(R.id.box);
         rootLayout = findViewById(R.id.rootLayout);
 
-        // Correctement définir le listener
-        rootLayout.setOnTouchListener(new View.OnTouchListener() {
+        // Crée le GestureDetector
+        gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
+
             @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        Log.d(DEBUG_TAG, "Action was DOWN");
+            public boolean onDown(@NonNull MotionEvent event) {
+                float touchX = event.getX();
+                float touchY = event.getY();
 
-                        float touchX = event.getX();
-                        float touchY = event.getY();
+                // Vérifie si le toucher est dans la boîte
+                if (touchX >= box.getX() && touchX <= box.getX() + box.getWidth()
+                        && touchY >= box.getY() && touchY <= box.getY() + box.getHeight()) {
 
-                        // Vérifie si le toucher est à l'intérieur du carré
-                        if (touchX >= box.getX() && touchX <= box.getX() + box.getWidth()
-                                && touchY >= box.getY() && touchY <= box.getY() + box.getHeight()) {
-
-                            Log.d(DEBUG_TAG, "Touch was inside the box");
-
-                            // On déplace le carré à la position du doigt, centré
-                            box.setX(touchX - box.getWidth() / 2f);
-                            box.setY(touchY - box.getHeight() / 2f);
-
-                            // On autorise le mouvement
-                            return true;
-
-                        } else {
-                            Log.d(DEBUG_TAG, "Touch was outside the box");
-                        }
-
-                        return false; // on ne consomme pas l'événement si on n'a pas touché le carré
-
-                    case MotionEvent.ACTION_MOVE:
-                        Log.d(DEBUG_TAG, "Action was MOVE");
-                        // On déplace le carré à la position du doigt
-                        box.setX(event.getX() - (float) box.getWidth() / 2);
-                        box.setY(event.getY() - (float) box.getHeight() / 2);
-
-                        return true;
-                    case MotionEvent.ACTION_UP:
-                        Log.d(DEBUG_TAG, "Action was UP");
-                        return true;
-                    case MotionEvent.ACTION_CANCEL:
-                        Log.d(DEBUG_TAG, "Action was CANCEL");
-                        return true;
-                    case MotionEvent.ACTION_OUTSIDE:
-                        Log.d(DEBUG_TAG, "Movement occurred outside bounds of current screen element");
-                        return true;
-                    default:
-                        return false;
+                    Log.d(DEBUG_TAG, "onDown: Touch started inside the box");
+                    isDragging = true; // commence le drag
+                    return true; // on consomme l'événement
                 }
+                isDragging = false;
+                return false; // toucher en dehors de la boîte
+            }
+
+            @Override
+            public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+                if (isDragging) {
+                    // Déplace la boîte en inversant distanceX/distanceY pour que ça suive le doigt
+                    box.setX(box.getX() - distanceX);
+                    box.setY(box.getY() - distanceY);
+                    return true; // on consomme l'événement
+                }
+                return false;
             }
         });
+
+        // Applique le GestureDetector sur le layout racine
+        rootLayout.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
     }
 }
