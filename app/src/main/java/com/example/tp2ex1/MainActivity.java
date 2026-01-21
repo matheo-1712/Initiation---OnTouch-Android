@@ -81,5 +81,11 @@ public class MainActivity extends AppCompatActivity {
             Log.d(DEBUG_TAG, "onTouch RecyclerView");
             return gestureDetector.onTouchEvent(event);
         });
+
+        // Applique le GestureDetector sur le layout racine (pour la partie vide en bas)
+        rootLayout.setOnTouchListener((v, event) -> {
+            Log.d(DEBUG_TAG, "onTouch RootLayout");
+            return gestureDetector.onTouchEvent(event);
+        });
     }
 }
