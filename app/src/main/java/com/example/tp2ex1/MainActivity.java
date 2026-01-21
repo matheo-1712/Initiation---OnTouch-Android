@@ -9,12 +9,15 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import java.util.ArrayList;
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity {
 
     private static final String DEBUG_TAG = "DEBUG";
     private View box;
-    private View rootLayout;
-
     private GestureDetector gestureDetector;
     private boolean isDragging = false; // pour savoir si on est en train de déplacer la boîte
 
@@ -24,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         box = findViewById(R.id.box);
-        rootLayout = findViewById(R.id.rootLayout);
+        View rootLayout = findViewById(R.id.rootLayout);
 
         // Crée le GestureDetector
         gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
@@ -50,21 +53,33 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
                 if (isDragging) {
-                    // Déplace la boîte en inversant distanceX/distanceY pour que ça suive le doigt
+                    // Update the box position
                     box.setX(box.getX() - distanceX);
                     box.setY(box.getY() - distanceY);
-                    return true; // on consomme l'événement
+                    return true;
                 }
                 return false;
             }
-
-            public boolean onTap() {
-                Log.d(DEBUG_TAG, "onTap: Touch on the box");
-                return true; // on consomme
-                }
         });
 
-        // Applique le GestureDetector sur le layout racine
-        rootLayout.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
+        // Initialize RecyclerView
+        RecyclerView recyclerView = findViewById(R.id.recyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        // Create dummy data
+        List<String> data = new ArrayList<>();
+        for (int i = 1; i <= 50; i++) {
+            data.add("Item " + i);
+        }
+
+        // Set Adapter
+        MyAdapter adapter = new MyAdapter(data);
+        recyclerView.setAdapter(adapter);
+
+        // Applique le GestureDetector sur le RecyclerView
+        recyclerView.setOnTouchListener((v, event) -> {
+            Log.d(DEBUG_TAG, "onTouch RecyclerView");
+            return gestureDetector.onTouchEvent(event);
+        });
     }
 }
